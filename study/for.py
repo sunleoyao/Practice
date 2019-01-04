@@ -1,4 +1,4 @@
-# -*- coding utf-8 -*-
+# -*- coding: utf-8 -*-
 zimus=['a','b','c']
 for zimu in zimus:
     print(zimu)
