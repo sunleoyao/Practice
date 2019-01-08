@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #list
-num=[1,2,3,4,5]
+num=[1,3,2,4,5]
 print(num)
 print(num[1])
 print(num[-1])
