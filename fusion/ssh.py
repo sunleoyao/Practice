@@ -38,15 +38,19 @@ def ssh_su_root(ssh,root_pwd):
         if buff.endswith('assword: '):
             ssh.send(root_pwd)
             ssh.send('\n')
+            # print(buff)
             buff = ""
             for x in range(0,50):
                 resp = ssh.recv(9999)
-                buff +=resp.decode('utf8')
+                buff = resp.decode('utf8')
+                # print(buff)
                 if buff.endswith('# '):
                     print('login as root')
                     return 0
-                else:
-                    pass
+                elif 'Authentication failure' in buff:
+                    print("ERROR！root密码错误！请重新尝试！")
+                    return 1
+                time.sleep(0.1)
         else:
             pass
         time.sleep(0.1)
@@ -66,7 +70,7 @@ def ssh_close(ssh):
 
 if __name__ == "__main__":
     a=ssh_user('192.168.122.134', 'riil', 'riiladmin', '22')
-    ssh_su_root(a,'rootroot')
-    ssh_root_cmd(a,'whoami')
-    ssh_root_cmd(a,'pwd')
+    if ssh_su_root(a,'rootroot')==0:
+        ssh_root_cmd(a,'whoami')
+        ssh_root_cmd(a,'pwd')
     ssh_close(a)
