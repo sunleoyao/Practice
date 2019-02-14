@@ -38,12 +38,10 @@ def ssh_su_root(ssh,root_pwd):
         if buff.endswith('assword: '):
             ssh.send(root_pwd)
             ssh.send('\n')
-            # print(buff)
             buff = ""
             for x in range(0,50):
                 resp = ssh.recv(9999)
                 buff = resp.decode('utf8')
-                # print(buff)
                 if buff.endswith('# '):
                     print('login as root')
                     return 0
