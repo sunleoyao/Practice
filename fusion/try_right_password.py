@@ -31,7 +31,6 @@ def ssh_user(host,username,password,port):
 
 def ssh_su_root(ssh,root_pwd_list):
     for root_pwd in root_pwd_list:
-        
         ssh.send('su - root\n')
         time.sleep(1)
         buff = ''
