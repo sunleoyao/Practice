@@ -30,41 +30,31 @@ def ssh_user(host,username,password,port):
     return ssh
 
 def ssh_su_root(ssh,root_pwd_list):
-    for root_pwd in root_pwd_list:
-        ssh.send('su - root\n')
-        time.sleep(1)
-        buff = ''
-        for i in range(0,500):
-            result=''
-            print('1')
-            print(ssh.recv(9999))
+    for root_password in root_pwd_list:
+        buff=''
+        ssh.send('su - root'+'\n')
+        time.sleep(0.1)
+        resp = ssh.recv(9999)
+        buff += resp.decode('utf8')
+        count=0
+        while True:
             resp = ssh.recv(9999)
-            print(len(resp))
-            print('2')
-            buff +=resp.decode('utf8')
-            print('3')
+            buff = resp.decode('utf8')
             if buff.endswith('assword: '):
-                print(root_pwd)
-                ssh.send(root_pwd)
-                ssh.send('\n')
-                buff = ""
-                for x in range(0,500):
-                    resp = ssh.recv(9999)
-                    buff = resp.decode('utf8')
-                    if buff.endswith('# '):
-                        print('login as root')
-                        print(root_pwd)
-                        return root_pwd
-                    elif 'Authentication failure' in buff:
-                        result='n'
-                        print('nnn')
-                        if root_pwd==root_pwd_list[-1]:
-                            return result
-                        break
-                    time.sleep(0.01)
-            else:
-                pass
+                ssh.send(root_password+'\n')
+                time.sleep(0.1)
+                resp = ssh.recv(9999)
+                buff = resp.decode('utf8')
+                if 'failure' in buff:
+                    break
+                if '#' in buff:
+                    return 0,root_password
+                    break
+            count += 1
             time.sleep(0.01)
+            if count > 500:
+                return 1,''
+                break
 
 def ssh_root_cmd(ssh,root_cmd):
     ssh.send(root_cmd) #放入要执行的命令
@@ -82,9 +72,9 @@ def ssh_close(ssh):
 if __name__ == "__main__":
     a=ssh_user('192.168.122.134', 'riil', 'riiladmin', '22')
     root_password=['rootroot1','rootroot','rootroot3']
-    right_root_passwd = ssh_su_root(a,root_password)
-    print('right_root_passwd='+right_root_passwd)
-    if right_root_passwd =='n':
-        ssh_root_cmd(a,'whoami')
-        ssh_root_cmd(a,'pwd')
+    result,right_root_passwd = ssh_su_root(a,root_password)
+    print('right_root_passwd : '+right_root_passwd)
+    # if right_root_passwd =='0':
+    #     ssh_root_cmd(a,'whoami')
+    #     ssh_root_cmd(a,'pwd')
     ssh_close(a)
