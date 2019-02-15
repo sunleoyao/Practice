@@ -34,15 +34,20 @@ def ssh_su_root(ssh,root_pwd_list):
         buff=''
         ssh.send('su - root'+'\n')
         time.sleep(0.1)
-        while True:
+        #等待password出现
+        count=0
+        while count<50:
             resp = ssh.recv(100)
             buff = resp.decode('utf8')
             if buff.endswith('assword: '):
                 ssh.send(root_password+'\n')
                 time.sleep(0.1)
                 break
+            count += 1
             time.sleep(0.1)
-        while True:
+        #等待输入密码后结果
+        count=0
+        while count<50:
             resp = ssh.recv(9999)
             buff = resp.decode('utf8')
             if 'failure' in buff:
@@ -53,6 +58,8 @@ def ssh_su_root(ssh,root_pwd_list):
                 print('login as root')
                 return 0,root_password
                 break
+            count += 1
+            time.sleep(0.1)
 
 def ssh_root_cmd(ssh,root_cmd):
     ssh.send(root_cmd) #放入要执行的命令
@@ -69,7 +76,7 @@ def ssh_close(ssh):
 
 if __name__ == "__main__":
     a=ssh_user('192.168.122.134', 'riil', 'riiladmin', '22')
-    root_password=['rootroot1','rootroot1','rootroot']
+    root_password=['rootroot1','rootroot1','rootroot3']
     result,right_root_passwd = ssh_su_root(a,root_password)
     if result==0:
         print('Right root passwd is : '+right_root_passwd)
