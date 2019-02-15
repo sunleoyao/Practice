@@ -34,26 +34,24 @@ def ssh_su_root(ssh,root_pwd_list):
         buff=''
         ssh.send('su - root'+'\n')
         time.sleep(0.1)
-        resp = ssh.recv(9999)
-        buff += resp.decode('utf8')
-        count=0
         while True:
-            resp = ssh.recv(9999)
+            resp = ssh.recv(100)
             buff = resp.decode('utf8')
             if buff.endswith('assword: '):
                 ssh.send(root_password+'\n')
                 time.sleep(0.1)
-                resp = ssh.recv(9999)
-                buff = resp.decode('utf8')
-                if 'failure' in buff:
-                    break
-                if '#' in buff:
-                    return 0,root_password
-                    break
-            count += 1
-            time.sleep(0.01)
-            if count > 500:
-                return 1,''
+                break
+            time.sleep(0.1)
+        while True:
+            resp = ssh.recv(9999)
+            buff = resp.decode('utf8')
+            if 'failure' in buff:
+                if root_password==root_pwd_list[-1]:
+                    return 1,''
+                break
+            if '#' in buff:
+                print('login as root')
+                return 0,root_password
                 break
 
 def ssh_root_cmd(ssh,root_cmd):
@@ -71,10 +69,12 @@ def ssh_close(ssh):
 
 if __name__ == "__main__":
     a=ssh_user('192.168.122.134', 'riil', 'riiladmin', '22')
-    root_password=['rootroot1','rootroot','rootroot3']
+    root_password=['rootroot1','rootroot1','rootroot']
     result,right_root_passwd = ssh_su_root(a,root_password)
-    print('right_root_passwd : '+right_root_passwd)
-    # if right_root_passwd =='0':
-    #     ssh_root_cmd(a,'whoami')
-    #     ssh_root_cmd(a,'pwd')
+    if result==0:
+        print('Right root passwd is : '+right_root_passwd)
+        #ssh_root_cmd(a,'whoami')
+        #ssh_root_cmd(a,'pwd')
+    if result==1:
+        print("Sorry ! Don't find correct root password!")
     ssh_close(a)
